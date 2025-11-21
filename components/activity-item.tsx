@@ -1,6 +1,7 @@
 // components/dashboard/ActivityItem.tsx
 "use client";
 import { formatDistanceToNowStrict } from "date-fns";
+import { useEffect, useState } from "react";
 
 interface ActivityItemProps {
   userName: string;
@@ -15,7 +16,11 @@ export function ActivityItem({
   tourName,
   timestamp,
 }: ActivityItemProps) {
-  const timeAgo = formatTimestamp(timestamp);
+  const [timeAgo, setTimeAgo] = useState<string>("");
+
+  useEffect(() => {
+    setTimeAgo(formatTimestamp(timestamp));
+  }, [timestamp]);
 
   return (
     <div className="flex items-start gap-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useTransition, useState, useRef } from "react";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -128,15 +129,10 @@ export function UsersTable({
   const formatStatus = (status: string) =>
     status.charAt(0).toUpperCase() + status.slice(1);
 
-  const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return format(date, "MMM d, yyyy h:mm a");
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
