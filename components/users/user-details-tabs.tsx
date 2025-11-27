@@ -1,6 +1,8 @@
 "use client"
 import { useState } from "react";
 import { UserToursTab } from "@/components/users/users-tours-tab";
+import { UserTransactionsTab } from "@/components/users/user-transaction-tab";
+import { UserReviewsTab } from "@/components/users/user-reviews-tab";
 
 
 
@@ -61,8 +63,8 @@ export function UserDetailsTab({
 
       {/* Tab Content */}
       {activeTab === "tours" && <UserToursTab userId={userId} />}
-      {/* {activeTab === "transactions" && <UserTransactionsTab userId={userId} />}
-      {activeTab === "reviews" && <UserReviewsTab userId={userId} />} */}
+      {activeTab === "transactions" && <UserTransactionsTab userId={userId} />}
+      {activeTab === "reviews" && <UserReviewsTab userId={userId} />}
     </main>
   );
 }

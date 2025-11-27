@@ -1,15 +1,52 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { StatCard } from "@/components/ui/stat-card";
 import {
   MapPin,
   CreditCard,
   Star,
-  Ticket,
+  Users,
   Wallet,
   MessageSquare,
 } from "lucide-react";
-// import { cn } from "@/lib/utils"
-import { StatCard } from "@/components/ui/stat-card";
+
+/**
+ * =============================================================================
+ * BACKEND REQUIREMENTS: User Stats API
+ * =============================================================================
+ *
+ * Endpoint: GET /api/users/[id]/stats
+ *
+ * Expected Response:
+ * {
+ *   toursCreated: number,        // Count of tours created by this user (tour guides)
+ *   totalEarnings: number,       // Total earnings in Naira (tour guides)
+ *   averageRating: number | null,// Average rating from reviews (null if no reviews)
+ *   totalBookings: number,       // Total bookings made (travelers) or received (tour guides)
+ *   totalSpent: number,          // Total amount spent in Naira (travelers)
+ *   totalReviews: number         // Total reviews written or received
+ * }
+ *
+ * SQL Queries Required:
+ *
+ * For Tour Guides:
+ * - toursCreated: SELECT COUNT(*) FROM tours WHERE creator_id = $userId
+ * - totalEarnings: SELECT COALESCE(SUM(amount), 0) FROM transactions
+ *                  WHERE recipient_id = $userId AND type = 'earning'
+ * - averageRating: SELECT AVG(rating) FROM reviews WHERE tour_guide_id = $userId
+ * - totalBookings: SELECT COUNT(*) FROM bookings b
+ *                  JOIN tours t ON b.tour_id = t.id WHERE t.creator_id = $userId
+ * - totalReviews: SELECT COUNT(*) FROM reviews WHERE tour_guide_id = $userId
+ *
+ * For Travelers:
+ * - totalBookings: SELECT COUNT(*) FROM bookings WHERE user_id = $userId
+ * - totalSpent: SELECT COALESCE(SUM(amount), 0) FROM transactions
+ *               WHERE user_id = $userId AND type = 'payment'
+ * - totalReviews: SELECT COUNT(*) FROM reviews WHERE reviewer_id = $userId
+ *
+ * =============================================================================
+ */
 
 interface UserStats {
   toursCreated: number;
@@ -19,13 +56,21 @@ interface UserStats {
   totalSpent: number;
   totalReviews: number;
 }
+
 interface UserStatsGridProps {
   userId: string;
+  userRole: "tour-guide" | "traveler";
+  isVerified: boolean;
 }
 
-export function UserStats({ userId }: UserStatsGridProps) {
+export function UserStats({
+  userId,
+  userRole,
+  isVerified,
+}: UserStatsGridProps) {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     fetch(`/api/users/${userId}/stats`)
       .then((res) => res.json())
@@ -38,9 +83,11 @@ export function UserStats({ userId }: UserStatsGridProps) {
         setLoading(false);
       });
   }, [userId]);
+
   const formatCurrency = (amount: number) => {
     return `₦${amount.toLocaleString()}`;
   };
+
   if (loading) {
     return (
       <div className="grid grid-cols-3 gap-4 mb-6">
@@ -58,52 +105,82 @@ export function UserStats({ userId }: UserStatsGridProps) {
   }
 
   if (!stats) return null;
-  return (
-    <div className="space-y-4 mb-6">
-      <div className="grid grid-cols-3 gap-4">
-        <StatCard
-          title="Tours Created"
-          value={stats.toursCreated}
-          icon={MapPin}
-          iconClassName="bg-orange-50 text-orange-500"
-        />
-        <StatCard
-          title="Total Earnings"
-          value={formatCurrency(stats.totalEarnings)}
-          icon={CreditCard}
-          iconClassName="bg-green-50 text-green-500"
-          valueClassName="text-green-600"
-        />
-        <StatCard
-          title="Average Rating"
-          value="-"
-          icon={Star}
-          iconClassName="bg-yellow-50 text-yellow-500"
-          showStar={true}
-        />
-      </div>
 
-      <div className="grid grid-cols-3 gap-4">
+  // Show simplified stats for Travelers OR Unverified users (even if they are Tour Guides)
+  if (userRole === "traveler" || !isVerified) {
+    return (
+      <div className="grid grid-cols-2 gap-4 mb-6">
         <StatCard
           title="Total Bookings"
           value={stats.totalBookings}
-          icon={Ticket}
+          icon={Users}
           iconClassName="bg-blue-50 text-blue-500"
         />
         <StatCard
           title="Total Spent"
           value={formatCurrency(stats.totalSpent)}
           icon={Wallet}
-          iconClassName="bg-purple-50 text-purple-500"
-          valueClassName="text-purple-600"
+          iconClassName="bg-green-50 text-green-500"
+          valueClassName="text-orange-500"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 mb-6">
+      {/* Row 1 */}
+      <div className="grid grid-cols-3 gap-4">
+        <StatCard
+          title="Tours Created"
+          value={stats.toursCreated}
+          icon={MapPin}
+          iconClassName="bg-red-50 text-red-500"
+        />
+        <StatCard
+          title="Total Earnings"
+          value={formatCurrency(stats.totalEarnings)}
+          icon={CreditCard}
+          iconClassName="bg-green-50 text-green-500"
+          valueClassName="text-orange-500"
+        />
+        <StatCard
+          title="Average Rating"
+          value={
+            stats.averageRating !== null
+              ? `${stats.averageRating.toFixed(1)}`
+              : "-"
+          }
+          icon={Star}
+          iconClassName="bg-yellow-50 text-yellow-500"
+          valueClassName="flex items-center gap-2"
+        />
+      </div>
+
+      {/* Row 2 */}
+      <div className="grid grid-cols-3 gap-4">
+        <StatCard
+          title="Total Bookings"
+          value={stats.totalBookings}
+          icon={Users}
+          iconClassName="bg-blue-50 text-blue-500"
+        />
+        <StatCard
+          title="Total Spent"
+          value={formatCurrency(stats.totalSpent)}
+          icon={Wallet}
+          iconClassName="bg-green-50 text-green-500"
+          valueClassName="text-orange-500"
         />
         <StatCard
           title="Total Reviews"
           value={stats.totalReviews}
           icon={MessageSquare}
-          iconClassName="bg-gray-50 text-gray-500"
+          iconClassName="bg-purple-50 text-purple-500"
         />
       </div>
     </div>
   );
 }
+
+

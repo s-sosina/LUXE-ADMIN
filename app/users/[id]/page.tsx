@@ -68,7 +68,7 @@ export default async function UserDetailsPage({
       {/* User Profile Card  */}
       <UserProfile userId={id} />
       {/* User Stats Grid */}
-      <UserStats userId={id} />
+      <UserStats userId={id} userRole={userData.role} isVerified={userData.isVerified} />
 
       {/* Tours, Transactions, Reviews Tabs - with role-based conditional rendering */}
       <UserDetailsTab
