@@ -11,6 +11,7 @@ interface PaginationProps {
   itemLabel: string;
   onPageChange: (page: number) => void;
   loading?: boolean;
+  className?: string;
 }
 
 export function Pagination({
@@ -21,6 +22,7 @@ export function Pagination({
   itemLabel,
   onPageChange,
   loading = false,
+  className,
 }: PaginationProps) {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
@@ -38,7 +40,7 @@ export function Pagination({
   };
 
   return (
-    <div className="px-6 py-4 flex items-center justify-between bg-white border-t border-gray-100">
+    <div className={`px-6 py-4 flex items-center justify-between bg-white border-t border-gray-100 ${className || ""}`}>
       <p className="text-xs text-gray-500">
         Showing {totalItems === 0 ? 0 : startItem} to {endItem} of {totalItems} {itemLabel}
       </p>

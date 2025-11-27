@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useTransition, useState, useRef } from "react";
 import { format } from "date-fns";
 import {
@@ -14,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal, CheckCircle2 } from "lucide-react";
+import { MoreHorizontal, BadgeCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -126,6 +127,8 @@ export function UsersTable({
   const formatRole = (role: string) =>
     role === "tour-guide" ? "Tour Guide" : "Traveler";
 
+  
+
   const formatStatus = (status: string) =>
     status.charAt(0).toUpperCase() + status.slice(1);
 
@@ -224,9 +227,13 @@ export function UsersTable({
                         <p className="font-medium text-foreground">
                           {user.name}
                         </p>
-                        {user.isVerified && (
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        )}
+                        <BadgeCheck
+                          className={`h-4 w-4 ${
+                            user.isVerified
+                              ? "stroke-green-800"
+                              : "stroke-gray-800"
+                          }`}
+                        />
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {user.email}
@@ -259,12 +266,10 @@ export function UsersTable({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
-                      <DropdownMenuItem>Edit User</DropdownMenuItem>
-                      <DropdownMenuItem>Change Status</DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
-                        Delete User
-                      </DropdownMenuItem>
+                      <Link href={`/users/${user.id}`}>
+                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                      </Link>
+                      <DropdownMenuItem>Suspend user</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

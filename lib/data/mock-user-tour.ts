@@ -1,0 +1,28 @@
+export const MOCK_TOURS = [
+  {
+    id: "tour-1",
+    title: "3-day Abeokuta Adventure",
+    location: "Ogun State, Nigeria",
+    image: "/olumo-rock-abeokuta-nigeria.jpg",
+    startDate: "2025-08-21",
+    endDate: "2025-08-23",
+    duration: "3 days 2 Nights",
+    bookingsCount: 1,
+    price: 120000,
+    status: "active" as const,
+    creatorId: "usr_001",
+  },
+  {
+    id: "tour-2",
+    title: "1 day Visit to Lekki Conservation Center",
+    location: "Lagos State, Nigeria",
+    image: "/lekki-conservation-center-canopy-walkway-lagos.jpg",
+    startDate: "2025-06-14",
+    endDate: "2025-06-14",
+    duration: "1 day",
+    bookingsCount: 7,
+    price: 20000,
+    status: "completed" as const,
+    creatorId: "usr_001",
+  },
+];

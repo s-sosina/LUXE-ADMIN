@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MOCK_USERS } from "@/lib/data/mock-user-details";
 
-// Force dynamic rendering for this route
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+
 
 // BACKEND INTEGRATION NOTES:
 // =========================
@@ -58,141 +57,18 @@ export async function GET(request: NextRequest) {
   // `
   // const users = await db.query(query, [search, role, status])
 
-  // Mock data
-  const mockUsers = [
-    {
-      id: "1",
-      name: "Jason Chapel",
-      email: "jasonchapel97@gmail.com",
-      phone: "+234 812 345 2661",
-      role: "tour-guide",
-      status: "active",
-      dateJoined: "2025-10-14T12:24:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: true,
-    },
-    {
-      id: "2",
-      name: "Sarah Johnson",
-      email: "sarahj@gmail.com",
-      phone: "+234 812 345 2661",
-      role: "traveler",
-      status: "active",
-      dateJoined: "2025-10-14T12:24:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: true,
-    },
-    {
-      id: "3",
-      name: "Angela Abdul",
-      email: "angieabdul@rocketmail.com",
-      phone: "+234 812 345 2661",
-      role: "tour-guide",
-      status: "active",
-      dateJoined: "2025-10-14T12:24:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: true,
-    },
-    {
-      id: "4",
-      name: "Shalli Oniel",
-      email: "shalli.oniel@gmail.com",
-      phone: "+234 812 345 2661",
-      role: "traveler",
-      status: "pending",
-      dateJoined: "2025-10-14T12:24:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: false,
-    },
-    {
-      id: "5",
-      name: "Michael Chen",
-      email: "michael.chen@gmail.com",
-      phone: "+234 812 345 2662",
-      role: "tour-guide",
-      status: "active",
-      dateJoined: "2025-10-13T10:15:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: true,
-    },
-    {
-      id: "6",
-      name: "Emma Wilson",
-      email: "emma.wilson@gmail.com",
-      phone: "+234 812 345 2663",
-      role: "traveler",
-      status: "active",
-      dateJoined: "2025-10-12T14:30:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: false,
-    },
-    {
-      id: "7",
-      name: "David Brown",
-      email: "david.brown@gmail.com",
-      phone: "+234 812 345 2664",
-      role: "tour-guide",
-      status: "inactive",
-      dateJoined: "2025-10-11T09:45:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: true,
-    },
-    {
-      id: "8",
-      name: "Lisa Garcia",
-      email: "lisa.garcia@gmail.com",
-      phone: "+234 812 345 2665",
-      role: "traveler",
-      status: "active",
-      dateJoined: "2025-10-10T16:20:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: true,
-    },
-    {
-      id: "9",
-      name: "Robert Taylor",
-      email: "robert.taylor@gmail.com",
-      phone: "+234 812 345 2666",
-      role: "tour-guide",
-      status: "pending",
-      dateJoined: "2025-10-09T11:10:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: false,
-    },
-    {
-      id: "10",
-      name: "Jennifer Lee",
-      email: "jennifer.lee@gmail.com",
-      phone: "+234 812 345 2667",
-      role: "traveler",
-      status: "active",
-      dateJoined: "2025-10-08T13:25:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: true,
-    },
-    {
-      id: "11",
-      name: "James Anderson",
-      email: "james.anderson@gmail.com",
-      phone: "+234 812 345 2668",
-      role: "tour-guide",
-      status: "active",
-      dateJoined: "2025-10-07T15:40:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: true,
-    },
-    {
-      id: "12",
-      name: "Maria Rodriguez",
-      email: "maria.rodriguez@gmail.com",
-      phone: "+234 812 345 2669",
-      role: "traveler",
-      status: "inactive",
-      dateJoined: "2025-10-06T12:55:00Z",
-      avatar: "/placeholder.svg?height=40&width=40",
-      isVerified: false,
-    },
-  ];
+  // Mock data from shared source
+  const mockUsers = Object.values(MOCK_USERS).map(user => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    status: user.status,
+    dateJoined: user.dateJoined,
+    avatar: user.avatar,
+    isVerified: user.isVerified,
+  }));
 
   // Filter mock data based on query params
   let filteredUsers = mockUsers;
