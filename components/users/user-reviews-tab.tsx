@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,22 +66,17 @@ interface UserReviewsTabProps {
 }
 
 export function UserReviewsTab({ userId }: UserReviewsTabProps) {
-  const [data, setData] = useState<ReviewsResponse | null>(null);
-  const [isPending, startTransition] = useTransition();
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    startTransition(() => {
-      fetch(`/api/users/${userId}/reviews?page=${currentPage}&limit=10`)
-        .then((res) => res.json())
-        .then((data) => {
-          setData(data);
-        })
-        .catch((err) => {
-          console.error("Error fetching reviews:", err);
-        });
-    });
-  }, [userId, currentPage]);
+  const { data, isLoading } = useQuery<ReviewsResponse>({
+    queryKey: ["user-reviews", userId, currentPage],
+    queryFn: async () => {
+      const res = await fetch(`/api/users/${userId}/reviews?page=${currentPage}&limit=10`)
+      if (!res.ok) throw new Error("Failed to fetch reviews")
+      return res.json()
+    },
+    placeholderData: keepPreviousData,
+  })
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -106,7 +103,20 @@ export function UserReviewsTab({ userId }: UserReviewsTabProps) {
     );
   };
 
-  if (!data) {
+  const reviews = data?.reviews || [];
+  const pagination = data?.pagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+  };
+  const startItem = (pagination.currentPage - 1) * pagination.itemsPerPage + 1;
+  const endItem = Math.min(
+    pagination.currentPage * pagination.itemsPerPage,
+    pagination.totalItems
+  );
+
+  if (isLoading && !data) {
     return (
       <Card>
         <CardContent className="p-8">
@@ -118,26 +128,13 @@ export function UserReviewsTab({ userId }: UserReviewsTabProps) {
     );
   }
 
-  const pagination = data?.pagination || {
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-    itemsPerPage: 10,
-  };
-  const reviews = data?.reviews || [];
-  const startItem = (pagination.currentPage - 1) * pagination.itemsPerPage + 1;
-  const endItem = Math.min(
-    pagination.currentPage * pagination.itemsPerPage,
-    pagination.totalItems
-  );
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Reviews & Ratings</CardTitle>
         <CardDescription>Customer reviews from completed tours</CardDescription>
       </CardHeader>
-      <CardContent className={isPending ? "opacity-50 transition-opacity" : ""}>
+      <CardContent className={isLoading ? "opacity-50 transition-opacity" : ""}>
         {reviews.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">
             No reviews found
@@ -194,7 +191,7 @@ export function UserReviewsTab({ userId }: UserReviewsTabProps) {
             variant="outline"
             size="sm"
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1 || isPending}
+            disabled={currentPage === 1 || isLoading}
             className="gap-1"
           >
             Previous
@@ -208,7 +205,7 @@ export function UserReviewsTab({ userId }: UserReviewsTabProps) {
             onClick={() =>
               setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))
             }
-            disabled={currentPage >= pagination.totalPages || isPending}
+            disabled={currentPage >= pagination.totalPages || isLoading}
             className="gap-1"
           >
             Next

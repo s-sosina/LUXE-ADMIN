@@ -3,10 +3,10 @@
 
 import { CardTitle } from "@/components/ui/card";
 import { Pagination } from "./pagination-component";
-import { useEffect, useState } from "react";
-import { getRecentActivities } from "@/lib/services";
+import { useState } from "react";
 import { ActivityList } from "@/components/activity-list";
 import { Activity } from "@/lib/data/mock-dashboard";
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 
 interface PaginationData {
   page: number;
@@ -16,33 +16,27 @@ interface PaginationData {
 }
 
 export function RecentActivitySection() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [pagination, setPagination] = useState<PaginationData>({
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const { data, isLoading } = useQuery<{ activities: Activity[], pagination: PaginationData }>({
+    queryKey: ["activities", currentPage],
+    queryFn: async () => {
+      const res = await fetch(`/api/activities?page=${currentPage}&limit=8`)
+      if (!res.ok) {
+        throw new Error("Failed to fetch activities")
+      }
+      return res.json()
+    },
+    placeholderData: keepPreviousData,
+  })
+
+  const activities = data?.activities || [];
+  const pagination = data?.pagination || {
     page: 1,
     limit: 8,
     total: 0,
     totalPages: 1,
-  });
-  const [loading, setLoading] = useState(true);
-
-  const fetchActivities = async (page: number) => {
-    setLoading(true);
-    try {
-      const data = await getRecentActivities(page, 8);
-      setActivities(data.activities);
-      setPagination(data.pagination);
-    } catch (error) {
-      console.error("Failed to fetch activities:", error);
-    } finally {
-      setLoading(false);
-    }
   };
-
-  useEffect(() => {
-    fetchActivities(1);
-  }, []);
-
-  // Pagination logic moved to reusable component
 
   return (
     <div className="px-6 pb-8">
@@ -51,15 +45,15 @@ export function RecentActivitySection() {
           Recent Activity
         </CardTitle>
       </div>
-      <ActivityList activities={activities} isLoading={loading} />
+      <ActivityList activities={activities} isLoading={isLoading} />
       <Pagination
         currentPage={pagination.page}
         totalPages={pagination.totalPages}
         totalItems={pagination.total}
         itemsPerPage={pagination.limit}
         itemLabel="activities"
-        onPageChange={fetchActivities}
-        loading={loading}
+        onPageChange={setCurrentPage}
+        loading={isLoading}
       />
     </div>
   );

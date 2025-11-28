@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import {
   Users,
   Eye,
 } from "lucide-react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 
 /**
  * =============================================================================
@@ -75,22 +76,17 @@ interface UserToursTabProps {
 }
 
 export function UserToursTab({ userId }: UserToursTabProps) {
-  const [data, setData] = useState<ToursResponse | null>(null);
-  const [isPending, startTransition] = useTransition();
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    startTransition(() => {
-      fetch(`/api/users/${userId}/tours?page=${currentPage}&limit=5`)
-        .then((res) => res.json())
-        .then((data) => {
-          setData(data);
-        })
-        .catch((err) => {
-          console.error("Error fetching tours:", err);
-        });
-    });
-  }, [userId, currentPage]);
+  const { data, isLoading } = useQuery<ToursResponse>({
+    queryKey: ["user-tours", userId, currentPage],
+    queryFn: async () => {
+      const res = await fetch(`/api/users/${userId}/tours?page=${currentPage}&limit=5`)
+      if (!res.ok) throw new Error("Failed to fetch tours")
+      return res.json()
+    },
+    placeholderData: keepPreviousData,
+  })
 
   const formatDateRange = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
@@ -153,21 +149,21 @@ export function UserToursTab({ userId }: UserToursTabProps) {
     }
   };
 
-  if (isPending && !data) {
-    return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-8">
-        <p className="text-center text-gray-500">Loading tours...</p>
-      </div>
-    );
-  }
-
+  const tours = data?.tours || [];
   const pagination = data?.pagination || {
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
     itemsPerPage: 5,
   };
-  const tours = data?.tours || [];
+
+  if (isLoading && !data) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 p-8">
+        <p className="text-center text-gray-500">Loading tours...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6">
@@ -254,13 +250,13 @@ export function UserToursTab({ userId }: UserToursTabProps) {
       )}
 
       <Pagination
-        currentPage={currentPage}
+        currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
         totalItems={pagination.totalItems}
         itemsPerPage={pagination.itemsPerPage}
         itemLabel={pagination.totalItems === 1 ? "tour" : "tours"}
         onPageChange={setCurrentPage}
-        loading={isPending}
+        loading={isLoading}
         className="mt-6 pt-4 px-0 py-0 bg-transparent"
       />
     </div>

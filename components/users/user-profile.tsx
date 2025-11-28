@@ -3,6 +3,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+
 
 import { CheckCircle2, Calendar, Clock } from "lucide-react";
 
@@ -25,26 +27,17 @@ interface UserProfileCardProps {
 }
 
 export default function UserProfile({ userId }: UserProfileCardProps) {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    fetch(`/api/users/${userId}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setUser(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching user:", err);
-        setLoading(false);
-        setUser(null);
-      });
-  }, [userId]);
+  const queryClient = useQueryClient()
+
+
+ const { data: user, isLoading: loading } = useQuery<UserProfile>({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      const res = await fetch(`/api/users/${userId}`)
+      if (!res.ok) throw new Error("Failed to fetch user")
+      return res.json()
+    }
+  })
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleString("en-US", {

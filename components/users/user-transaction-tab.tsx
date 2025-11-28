@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState,useTransition } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 /**
  * =============================================================================
@@ -79,23 +80,17 @@ interface UserTransactionsTabProps {
 }
 
 export function UserTransactionsTab({ userId }: UserTransactionsTabProps) {
-  const [data, setData] = useState<TransactionsResponse | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [isPending, startTransition] = useTransition();
-
- useEffect(() => {
-   startTransition(() => {
-     fetch(`/api/users/${userId}/transactions?page=${currentPage}&limit=10`)
-       .then((res) => res.json())
-       .then((data) => {
-         setData(data);
-       })
-       .catch((err) => {
-         console.error("Error fetching transactions:", err);
-       });
-   });
- }, [userId, currentPage]);
+  const { data, isLoading } = useQuery<TransactionsResponse>({
+    queryKey: ["user-transactions", userId, currentPage],
+    queryFn: async () => {
+      const res = await fetch(`/api/users/${userId}/transactions?page=${currentPage}&limit=10`)
+      if (!res.ok) throw new Error("Failed to fetch transactions")
+      return res.json()
+    },
+    placeholderData: keepPreviousData,
+  })
 
   const formatCurrency = (amount: number) => {
     return `₦${amount.toLocaleString()}`;
@@ -152,7 +147,20 @@ export function UserTransactionsTab({ userId }: UserTransactionsTabProps) {
     }
   };
 
-  if (!data) {
+  const transactions = data?.transactions || [];
+  const pagination = data?.pagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+  };
+  const startItem = (pagination.currentPage - 1) * pagination.itemsPerPage + 1;
+  const endItem = Math.min(
+    pagination.currentPage * pagination.itemsPerPage,
+    pagination.totalItems
+  );
+
+  if (isLoading && !data) {
     return (
       <Card>
         <CardContent className="p-8">
@@ -164,19 +172,6 @@ export function UserTransactionsTab({ userId }: UserTransactionsTabProps) {
     );
   }
 
-  const pagination = data?.pagination || {
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-    itemsPerPage: 10,
-  };
-  const transactions = data?.transactions || [];
-  const startItem = (pagination.currentPage - 1) * pagination.itemsPerPage + 1;
-  const endItem = Math.min(
-    pagination.currentPage * pagination.itemsPerPage,
-    pagination.totalItems
-  );
-
   return (
     <Card>
       <CardHeader>
@@ -185,7 +180,7 @@ export function UserTransactionsTab({ userId }: UserTransactionsTabProps) {
           Complete transaction history for this user
         </CardDescription>
       </CardHeader>
-      <CardContent className={isPending ? "opacity-50 transition-opacity" : ""}>
+      <CardContent className={isLoading ? "opacity-50 transition-opacity" : ""}>
         {transactions.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">
             No transactions found

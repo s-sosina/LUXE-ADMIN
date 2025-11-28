@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useTransition, useState, useRef } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query"
 import { format } from "date-fns";
 import {
   Table,
@@ -23,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Pagination } from "@/components/pagination-component";
+import { keepPreviousData } from "@tanstack/react-query";
 
 interface User {
   id: string;
@@ -36,6 +38,16 @@ interface User {
   isVerified: boolean;
 }
 
+interface UsersResponse {
+  users: User[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+}
+
 interface UsersTableProps {
   searchQuery: string;
   roleFilter: string;
@@ -47,64 +59,32 @@ export function UsersTable({
   roleFilter,
   statusFilter,
 }: UsersTableProps) {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isPending, startTransition] = useTransition();
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10;
-  const prevSearchQuery = useRef(searchQuery);
-  const prevRoleFilter = useRef(roleFilter);
-  const prevStatusFilter = useRef(statusFilter);
 
-  useEffect(() => {
-    const handler = () => {
-      startTransition(() => {
-        // Reset to page 1 if filters changed
-        const filtersChanged =
-          prevSearchQuery.current !== searchQuery ||
-          prevRoleFilter.current !== roleFilter ||
-          prevStatusFilter.current !== statusFilter;
+  const { data, isLoading } = useQuery<UsersResponse>({
+    queryKey: ["users", searchQuery, roleFilter, statusFilter, currentPage],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      params.set("page", currentPage.toString())
+      params.set("limit", "10")
+      if (searchQuery) params.set("search", searchQuery)
+      if (roleFilter !== "all") params.set("role", roleFilter)
+      if (statusFilter !== "all") params.set("status", statusFilter)
 
-        const page = filtersChanged ? 1 : currentPage;
+      const res = await fetch(`/api/users?${params.toString()}`)
+      if (!res.ok) throw new Error("Failed to fetch users")
+      return res.json()
+    },
+    placeholderData: keepPreviousData,
+  })
 
-        if (filtersChanged) {
-          prevSearchQuery.current = searchQuery;
-          prevRoleFilter.current = roleFilter;
-          prevStatusFilter.current = statusFilter;
-        }
-
-        const params = new URLSearchParams();
-        if (searchQuery) params.set("search", searchQuery);
-        if (roleFilter !== "all") params.set("role", roleFilter);
-        if (statusFilter !== "all") params.set("status", statusFilter);
-        params.set("page", page.toString());
-        params.set("limit", itemsPerPage.toString());
-
-        fetch(`/api/users?${params.toString()}`, {
-          cache: "no-store",
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setUsers(data.users || []);
-            setTotalItems(data.totalItems || 0);
-            setTotalPages(data.totalPages || 1);
-            if (filtersChanged) {
-              setCurrentPage(1);
-            }
-          })
-          .catch((err) => {
-            console.error("Failed to fetch users:", err);
-            setUsers([]);
-            setTotalItems(0);
-            setTotalPages(1);
-          });
-      });
-    };
-
-    const timer = setTimeout(handler, 400);
-    return () => clearTimeout(timer);
-  }, [searchQuery, roleFilter, statusFilter, currentPage, itemsPerPage]);
+  const users = data?.users || [];
+  const pagination = data?.pagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+  };
 
   const getRoleBadgeColor = (role: string) =>
     role === "tour-guide"
@@ -127,18 +107,12 @@ export function UsersTable({
   const formatRole = (role: string) =>
     role === "tour-guide" ? "Tour Guide" : "Traveler";
 
-  
-
   const formatStatus = (status: string) =>
     status.charAt(0).toUpperCase() + status.slice(1);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return format(date, "MMM d, yyyy h:mm a");
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
   };
 
   // Skeleton Rows
@@ -192,7 +166,7 @@ export function UsersTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isPending ? (
+          {isLoading ? (
             // Show 5 skeleton rows while loading
             Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
           ) : users.length === 0 ? (
@@ -278,15 +252,15 @@ export function UsersTable({
           )}
         </TableBody>
       </Table>
-      {totalItems > itemsPerPage && (
+      {pagination.totalItems > pagination.itemsPerPage && (
         <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.totalItems}
+          itemsPerPage={pagination.itemsPerPage}
           itemLabel="users"
-          onPageChange={handlePageChange}
-          loading={isPending}
+          onPageChange={setCurrentPage}
+          loading={isLoading}
         />
       )}
     </div>

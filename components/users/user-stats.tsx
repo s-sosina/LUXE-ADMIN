@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { StatCard } from "@/components/ui/stat-card";
 import {
   MapPin,
@@ -10,6 +9,8 @@ import {
   Wallet,
   MessageSquare,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query"
+
 
 /**
  * =============================================================================
@@ -68,27 +69,20 @@ export function UserStats({
   userRole,
   isVerified,
 }: UserStatsGridProps) {
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`/api/users/${userId}/stats`)
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching user stats:", err);
-        setLoading(false);
-      });
-  }, [userId]);
+  const { data: stats, isLoading } = useQuery<UserStats>({
+    queryKey: ["user-stats", userId],
+    queryFn: async () => {
+      const res = await fetch(`/api/users/${userId}/stats`)
+      if (!res.ok) throw new Error("Failed to fetch user stats")
+      return res.json()
+    }
+  })
 
   const formatCurrency = (amount: number) => {
     return `₦${amount.toLocaleString()}`;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[...Array(6)].map((_, i) => (
