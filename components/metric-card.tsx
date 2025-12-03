@@ -2,9 +2,8 @@
 
 import { Card } from "@/components/ui/card";
 import { Users, MapPin, Calendar, Wallet, TrendingUp } from "lucide-react";
-import { getMetrics } from "@/lib/services";
-import { useQuery } from "@tanstack/react-query"
-import { Metric } from "@/lib/data/mock-metrics";
+import { useQuery } from "@tanstack/react-query";
+import { Metric, FALLBACK_METRICS } from "@/lib/data/mock-metrics";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Users,
@@ -18,56 +17,31 @@ interface MetricsCardsProps {
 }
 
 export function MetricsCards({ period }: MetricsCardsProps) {
- const { data: metrics = [], isLoading, error } = useQuery<Metric[]>({
-   queryKey: ["metrics", period],
-   queryFn: async () => {
-     try {
-       const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/metrics?period=${period}`)
-       if (!res.ok) throw new Error("Failed")
-       return await res.json()
-     } catch (error) {
-       console.error("Error fetching metrics:", error)
-       return [
-         {
-           label: "Total Users",
-           value: "120",
-           change: "+12% from last month",
-           icon: "Users",
-           iconBg: "bg-blue-50",
-           iconColor: "text-blue-600",
-         },
-         {
-           label: "Active Tours",
-           value: "18",
-           change: "+8% from last month",
-           icon: "MapPin",
-           iconBg: "bg-green-50",
-           iconColor: "text-green-600",
-         },
-         {
-           label: "Total Bookings",
-           value: "234",
-           change: "+23% from last month",
-           icon: "Calendar",
-           iconBg: "bg-purple-50",
-           iconColor: "text-purple-600",
-         },
-         {
-           label: "Revenue",
-           value: "₦2.85M",
-           change: "+18% from last month",
-           icon: "Wallet",
-           iconBg: "bg-orange-50",
-           iconColor: "text-orange-600",
-         },
-       ]
-     }
-   }
- })
+  const {
+    data: metrics = [],
+    isLoading,
+    error,
+  } = useQuery<Metric[]>({
+    queryKey: ["metrics", period],
+    queryFn: async () => {
+      try {
+        const res = await fetch(
+          `${
+            process.env.NEXT_PUBLIC_APP_URL || ""
+          }/api/metrics?period=${period}`
+        );
+        if (!res.ok) throw new Error("Failed");
+        return await res.json();
+      } catch (error) {
+        console.error("Error fetching metrics:", error);
+        return FALLBACK_METRICS;
+      }
+    },
+  });
 
- if (isLoading) return <MetricsSkeleton />;
- if (error || !metrics)
-   return <div className="text-red-500">Failed to load metrics.</div>;
+  if (isLoading) return <MetricsSkeleton />;
+  if (error || !metrics)
+    return <div className="text-red-500">Failed to load metrics.</div>;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">

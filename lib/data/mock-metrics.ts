@@ -115,6 +115,42 @@ export const MOCK_METRICS: Record<string, Metric[]> = {
   ],
 };
 
+// Fallback metrics for error cases
+export const FALLBACK_METRICS: Metric[] = [
+  {
+    label: "Total Users",
+    value: "120",
+    change: "+12% from last month",
+    icon: "Users",
+    iconBg: "bg-blue-50",
+    iconColor: "text-blue-600",
+  },
+  {
+    label: "Active Tours",
+    value: "18",
+    change: "+8% from last month",
+    icon: "MapPin",
+    iconBg: "bg-green-50",
+    iconColor: "text-green-600",
+  },
+  {
+    label: "Total Bookings",
+    value: "234",
+    change: "+23% from last month",
+    icon: "Calendar",
+    iconBg: "bg-purple-50",
+    iconColor: "text-purple-600",
+  },
+  {
+    label: "Revenue",
+    value: "₦2.85M",
+    change: "+18% from last month",
+    icon: "Wallet",
+    iconBg: "bg-orange-50",
+    iconColor: "text-orange-600",
+  },
+];
+
 // Helper to simulate DB delay (Optional, keeps it realistic)
 export const delay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
