@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MOCK_ACTIVITIES, type Activity } from '@/lib/data/mock-dashboard';
+import { MOCK_ACTIVITIES } from '@/lib/data/mock-dashboard';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const limit = parseInt(searchParams.get('limit') || '8', 10);
+  const limit = parseInt(searchParams.get('limit') || '5', 10);
 
   const total = MOCK_ACTIVITIES.length;
   const totalPages = Math.ceil(total / limit);

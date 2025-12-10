@@ -1,0 +1,18 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="abeokutaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="200" fill="url(#abeokutaGrad)"/>
+  <text x="150" y="90" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">Abeokuta</text>
+  <text x="150" y="120" font-family="Arial, sans-serif" font-size="18" fill="white" text-anchor="middle">Adventure</text>
+  <polygon points="150,50 170,80 150,70 130,80" fill="white" opacity="0.7"/>
+  <polygon points="100,100 120,130 100,120 80,130" fill="white" opacity="0.7"/>
+  <polygon points="200,100 220,130 200,120 180,130" fill="white" opacity="0.7"/>
+</svg>
+
+
+
+

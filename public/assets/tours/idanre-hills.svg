@@ -1,0 +1,19 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="idanreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="200" fill="url(#idanreGrad)"/>
+  <text x="150" y="85" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">Idanre Hills</text>
+  <text x="150" y="115" font-family="Arial, sans-serif" font-size="18" fill="white" text-anchor="middle">Expedition</text>
+  <polygon points="80,140 100,100 120,140" fill="white" opacity="0.6"/>
+  <polygon points="120,150 140,110 160,150" fill="white" opacity="0.6"/>
+  <polygon points="160,150 180,110 200,150" fill="white" opacity="0.6"/>
+  <polygon points="200,160 220,120 240,160" fill="white" opacity="0.6"/>
+</svg>
+
+
+
+

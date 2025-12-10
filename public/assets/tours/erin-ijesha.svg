@@ -1,0 +1,19 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="erinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d9488;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="200" fill="url(#erinGrad)"/>
+  <text x="150" y="75" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">Erin-Ijesha</text>
+  <text x="150" y="105" font-family="Arial, sans-serif" font-size="18" fill="white" text-anchor="middle">Waterfall</text>
+  <path d="M 140 120 L 140 160 L 160 160 L 160 120" fill="white" opacity="0.5"/>
+  <path d="M 130 130 L 130 170 L 170 170 L 170 130" fill="white" opacity="0.3"/>
+  <path d="M 120 140 L 120 180 L 180 180 L 180 140" fill="white" opacity="0.2"/>
+  <circle cx="150" cy="145" r="3" fill="white" opacity="0.8"/>
+</svg>
+
+
+
+

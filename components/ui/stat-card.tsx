@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 interface StatCardProps {
   title: string
   value: string | number
-  icon: LucideIcon
+  icon?: LucideIcon
   trend?: {
     value: string
     label: string
@@ -34,10 +34,12 @@ export function StatCard({
         className,
       )}
     >
-      <div className="flex items-center gap-3 mb-4">
-        <div className={cn("p-2.5 rounded-lg", iconClassName)}>
-          <Icon className="w-5 h-5" />
-        </div>
+      <div className={cn("flex items-center gap-3", Icon && "mb-4")}>
+        {Icon && (
+          <div className={cn("p-2.5 rounded-lg", iconClassName)}>
+            <Icon className="w-5 h-5" />
+          </div>
+        )}
         <span className="text-gray-500 text-sm font-medium">{title}</span>
       </div>
 

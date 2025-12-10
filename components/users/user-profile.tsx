@@ -10,7 +10,7 @@ import EditDetails from "@/components/users/edit-details";
 // import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { CheckCircle2, Calendar, Clock } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 
 interface UserProfile {
   id: string;
